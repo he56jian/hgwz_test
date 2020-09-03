@@ -1,3 +1,4 @@
 # hgwz_test
-测试练习
-测试练习
+hgwz_appium:appium相关练习
+hgwz_python:python相关练习
+hgwz_selenium:selenium自动化测试练习
