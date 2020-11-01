@@ -8,3 +8,11 @@ forget:
   - click
   - find: {text:xxx}
   - send_keys: xxx
+
+search:
+  - id: home_search
+  - click: []
+  - id: search_input_text
+  - send_keys: alibaba
+  - id: name
+  - click: []
