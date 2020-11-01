@@ -14,6 +14,10 @@ class DemoPage(BasePage):
         pass
 
     def search(self, keyword):
-        self.po_run('search')
+        self.po_run('search', keyword=keyword)
         # self.find(self._search_button).click()
+        return self
+
+    def back(self):
+        self.po_run('back')
         return self

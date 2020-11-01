@@ -1,12 +1,21 @@
 import pytest
 
 from hgwz_test.hgwz_appium.练习.test_framwork.demo_page import DemoPage
+from hgwz_test.hgwz_appium.练习.test_framwork.utils import Utils
 
 
 class TestLogin:
+    data = Utils.from_file('test_search.yaml')
+
     def setup_class(self):
         self.demo = DemoPage()
         self.demo.start_app()
+
+    def setup(self):
+        pass
+
+    def teardown(self):
+        self.demo.back()
 
     # todo:测试数据的数据驱动
     @pytest.mark.parametrize('username,password', [
@@ -18,9 +27,10 @@ class TestLogin:
         self.demo.login(username, password)
         assert 1 == 1
 
-    @pytest.mark.parametrize('keyword', [
-        'alibaba',
-        'baidu'
-    ])
+    # @pytest.mark.parametrize('keyword', [
+    #     'alibaba',
+    #     'baidu'
+    # ])
+    @pytest.mark.parametrize(data['keys'], data['values'])
     def test_search(self, keyword):
         self.demo.search(keyword)
