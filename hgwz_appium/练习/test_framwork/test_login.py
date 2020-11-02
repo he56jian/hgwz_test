@@ -1,6 +1,8 @@
 import pytest
 
+from hgwz_test.hgwz_appium.练习.test_framwork.base_page import BasePage
 from hgwz_test.hgwz_appium.练习.test_framwork.demo_page import DemoPage
+from hgwz_test.hgwz_appium.练习.test_framwork.common_page import LoginPage
 from hgwz_test.hgwz_appium.练习.test_framwork.utils import Utils
 
 
@@ -10,14 +12,16 @@ class TestLogin:
     data = Utils.from_file(testcase_file)
 
     def setup_class(self):
+        self.app = BasePage()
+        self.app.start_app()
         self.demo = DemoPage(self.po_file)
-        self.demo.start_app()
+        # self.demo.start_app()
 
     def setup(self):
         pass
 
     def teardown(self):
-        self.demo.back()
+        pass
 
     # todo:测试数据的数据驱动
     @pytest.mark.parametrize('username,password', [
@@ -36,3 +40,11 @@ class TestLogin:
     @pytest.mark.parametrize(data['keys'], data['values'])
     def test_search(self, keyword):
         self.demo.search(keyword)
+        self.demo.back()
+
+    def test_login(self):
+        po_file = 'page_login.yaml'
+        login = LoginPage(po_file)
+        # login.start_app()     #因为在之前把start变成了类方法，执行了一次之后，driver就会变成类变量，就不用重复获取
+        # login.login_by_password('12315645612','123456')
+        login.login_by_password(username='12315645612', password='123456')
