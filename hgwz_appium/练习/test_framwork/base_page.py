@@ -10,6 +10,10 @@ class BasePage:
     _driver: WebDriver = None
     _current_element: WebElement = None
 
+    def __init__(self, po_file=None):
+        if po_file is not None:
+            self._po_file = po_file
+
     def start_app(self):
         cpas = {
             'platformName': 'android',
@@ -39,7 +43,7 @@ class BasePage:
 
     def po_run(self, po_method, **kwargs):
         # read yaml
-        with open('page_demo.yaml') as f:
+        with open(self._po_file) as f:
             yaml_data = yaml.safe_load(f)
             # find search
             for step in yaml_data[po_method]:

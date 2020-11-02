@@ -5,10 +5,12 @@ from hgwz_test.hgwz_appium.练习.test_framwork.utils import Utils
 
 
 class TestLogin:
-    data = Utils.from_file('test_search.yaml')
+    testcase_file = 'test_search.yaml'
+    po_file = 'page_demo.yaml'
+    data = Utils.from_file(testcase_file)
 
     def setup_class(self):
-        self.demo = DemoPage()
+        self.demo = DemoPage(self.po_file)
         self.demo.start_app()
 
     def setup(self):
