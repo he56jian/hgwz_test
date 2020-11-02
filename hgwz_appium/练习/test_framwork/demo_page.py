@@ -4,7 +4,7 @@ from hgwz_test.hgwz_appium.练习.test_framwork.base_page import BasePage
 
 
 class DemoPage(BasePage):
-    _search_button = (By.ID, 'home_search')
+    # _search_button = (By.ID, 'home_search')
 
     # todo: po的数据驱动
     def login(self):
