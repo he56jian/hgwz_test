@@ -47,6 +47,7 @@ class TestLogin:
     #  用commonpage
     @pytest.mark.parametrize(data['keys'], data['values'])
     def test_search_common(self, keyword):
+        # todo:python的元编程实现python语句的数据驱动
         demo = CommonPage(self.po_file)
         demo.search(keyword=keyword)
         demo.back()
