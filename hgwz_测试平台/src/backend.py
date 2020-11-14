@@ -1,13 +1,18 @@
-from flask import Flask
+from flask import Flask, request
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from flask_restful import Resource, Api
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-api = Api(app)  # 路由初始化
+api = Api(app)  # 路由初始化(
 
 # 数据库连接配置，和初始化
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://lagou3:lagou3@stuq.ceshiren.com:23306/lagou3'
 db = SQLAlchemy(app)
+
+# token配置
+app.config['JWT_SECRET_KEY'] = 'he56jian'  # token密钥
+jwt = JWTManager(app)
 
 
 # 数据库结构，表为User表
@@ -26,33 +31,64 @@ class User(db.Model):
 # def hello_world():
 #     return 'hello world'
 
-# 用户管理
+# 用户管理接口
 class UserApi(Resource):
+    # 用户查询
     def get(self):
         users = User.query.all()
         return [{'id': u.id, 'username': u.username} for u in users]
-        return {'message': 'user'}
+
+    # 用户登录
+    def post(self):
+        # 通过客户端的json中拿到username/password
+        username = request.json.get('username')
+        password = request.json.get('password')
+        user = User.query.filter_by(username=username, password=password).first()
+        if user:
+            # 登录成功后返回用户一个token
+            access_token = create_access_token(identity=username)
+            return {'msg': 'login success', 'token': access_token}
+        else:
+            return {
+                'msg': 'login fail '
+            }
+
+    # 用户注册
+    def put(self):
+        username = request.json.get('username')
+        password = request.json.get('password')
+        email = request.json.get('email')
+        user = User(username=username, password=password, email=email)
+        db.session.add(user)
+        db.session.commit()
+        return {'msg': 'register success'}
+
+    # 用户账号销毁
+    def delete(self):
+        pass
 
 
-# 用例管理
+# 用例管理接口
 class TestCaseApi(Resource):
+    # 该装饰器用于说明，当前需要使用token才能使用，会自动使用token校验；
+    @jwt_required
     def get(self):
         return {'message': 'TestCase'}
 
 
-# 任务管理
+# 任务管理接口
 class TaskApi(Resource):
     def get(self):
         return {'message': 'TestCase'}
 
 
-# 报告管理
+# 报告管理接口
 class ReportApi(Resource):
     def get(self):
         return {'message': 'TestCase'}
 
 
-# 首页管理
+# 首页管理接口
 class Main(Resource):
     def get(self):
         return {'message': 'TestCase'}
