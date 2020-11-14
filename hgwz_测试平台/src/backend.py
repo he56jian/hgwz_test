@@ -27,6 +27,21 @@ class User(db.Model):
         return '<User %r>' % self.username
 
 
+# 任务表结构定义
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    log = db.Column(db.String(1024), unique=False, nullable=False)
+    # 数据库的一对多模型
+    # 关联,使用db.ForeignKey('testcase_id')，表示外键指向的是testcase_id(即testcase表的主键
+    testcase_id = db.Column(db.Integer, db.ForeignKey('test_case_id'), nullable=False)
+    # 反向引用，根据key时获取其内容,即使用test_case_id的时候的结果
+    testcase = db.relationship('TestCase', backref=db.backref('task', lazy=True))
+
+    def __repr__(self):
+        return '<TestCase %r' % self.name
+
+
+# 参数用例表类
 class TestCase(db.Model):
     # 可以重新定义表的名字
     # __tablename__ = '表名'
@@ -150,8 +165,33 @@ class TestCaseApi(Resource):
 
 # 任务管理接口
 class TaskApi(Resource):
+    # @jwt_required
     def get(self):
-        return {'message': 'TestCase'}
+        return [{'id': task.id, 'log': task.log, 'testcase_id': task.testcase_id} for task in Task.query.all()]
+
+    @jwt_required
+    def post(self):
+        """
+        发起的是/testcase, post ,表示新增
+        发起的是/testcase?id=1, post，表示修改
+        :return:
+        """
+        # request.json获得的是客户端发过来的数据
+        task = Task()
+        if request.json.get('log'):
+            task.log = request.json.get('log')
+        if request.json.get('testcase_id'):
+            task.testcase_id = request.json.get('testcase_id')
+        db.session.add(task)
+        db.session.commit()
+
+    @jwt_required
+    def put(self):
+        pass
+
+    @jwt_required
+    def delete(self):
+        pass
 
 
 # 报告管理接口

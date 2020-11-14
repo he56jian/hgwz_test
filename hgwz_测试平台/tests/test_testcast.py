@@ -69,5 +69,6 @@ class Test_UserApi:
             }
         )
         assert r.status_code == 200
+        # 在服务端可以写成testcase.data，但是在客户端，只能使用testcase['data']
         data = [testcase['data'] for testcase in r.json() if testcase['id'] == 7][0]
         assert 'b2' in data
