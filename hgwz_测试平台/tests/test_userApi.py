@@ -26,7 +26,7 @@ class TestUserApi(TestCase):
     def test_delete(self):
         r = requests.delete('http://127.0.0.1:5000/login', json={
             'username': 'test_hjc',
-            'password': 'test_hjc',
+            'password': 'test_hjc2',
         })
 
     # 注册用户测试

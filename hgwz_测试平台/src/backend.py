@@ -27,6 +27,20 @@ class User(db.Model):
         return '<User %r>' % self.username
 
 
+class TestCase(db.Model):
+    # 可以重新定义表的名字
+    # __tablename__ = '表名'
+
+    id = db.Column(db.Integer, primary_key=True)
+    # unique是否能相同，True为不能相同
+    name = db.Column(db.String(80), unique=True, nullable=False)
+    # 指向测试数据的标记,步骤
+    data = db.Column(db.String(1024), unique=False, nullable=False)
+
+    def __repr__(self):
+        return '<TestCase %r' % self.name
+
+
 # @app.route('/')
 # def hello_world():
 #     return 'hello world'
@@ -44,8 +58,7 @@ class UserApi(Resource):
         username = request.json.get('username')
         password = request.json.get('password')
         email = request.json.get('email')
-        user = User.query.filter_by(username=username, password=password).first() | \
-               User.query.filter_by(email=email, password=password).first()
+        user = User.query.filter_by(username=username, password=password).first()
         if user:
             if username:
                 # 登录成功后返回用户一个token
@@ -96,13 +109,35 @@ class UserApi(Resource):
 # 用例管理接口
 class TestCaseApi(Resource):
     # 该装饰器用于说明，当前需要使用token才能使用，会自动使用token校验；
-    @jwt_required
+    # @jwt_required
     def get(self):
-        return {'message': 'TestCase'}
+        return [{'id': testcase.id, 'name': testcase.name, 'data': testcase.data} for testcase in TestCase.query.all()]
 
     @jwt_required
     def post(self):
-        pass
+        """
+        发起的是/testcase, post ,表示新增
+        发起的是/testcase?id=1, post，表示修改
+        :return:
+        """
+        param_id = request.args.get('id')
+        if param_id:
+            # 是否添加了?格式参数
+            testcase = TestCase.query.filter_by(id=param_id).first()
+            if request.json.get('name'):
+                testcase.name = request.json.get('name')
+            if request.json.get('data'):
+                testcase.data = request.json.get('data')
+            db.session.flush()
+            db.session.commit()
+        else:
+
+            # request.json获得的是客户端发过来的数据
+            testcase = TestCase()
+            testcase.name = request.json.get('name')
+            testcase.data = request.json.get('data')
+            db.session.add(testcase)
+            db.session.commit()
 
     @jwt_required
     def put(self):
@@ -111,6 +146,8 @@ class TestCaseApi(Resource):
     @jwt_required
     def delete(self):
         pass
+
+
 # 任务管理接口
 class TaskApi(Resource):
     def get(self):
