@@ -34,7 +34,6 @@ class User(db.Model):
 # 用户管理接口
 class UserApi(Resource):
     # 用户查询
-    @jwt_required
     def get(self):
         users = User.query.all()
         return [{'id': u.id, 'username': u.username, 'password': u.password, 'email': u.email} for u in users]
@@ -70,26 +69,23 @@ class UserApi(Resource):
         return {'msg': 'register success'}
 
     # 用户账号销毁
-    @jwt_required
     def delete(self):
         username = request.json.get('username')
         password = request.json.get('password')
         email = request.json.get('email')
-        user = User.query.filter_by(username=username, password=password).first() | \
-               User.query.filter_by(email=email, password=password).first()
+        user = User.query.filter_by(username=username, password=password).first()
         db.session.delete(user)
         db.session.commit()
 
     # 用户密码修改
-    @jwt_required
-    def modify(self):
+    # @jwt_required
+    def patch(self):
         username = request.json.get('username')
         password = request.json.get('password')
         newpassword = request.json.get('newpassword')
-        email = request.json.get('email')
+        # email = request.json.get('email')
 
-        user = User.query.filter_by(username=username, password=password).first() | \
-               User.query.filter_by(email=email, password=password).first()
+        user = User.query.filter_by(username=username, password=password).first()
         user.password = newpassword
         db.session.commit()
         return {
@@ -104,7 +100,17 @@ class TestCaseApi(Resource):
     def get(self):
         return {'message': 'TestCase'}
 
+    @jwt_required
+    def post(self):
+        pass
 
+    @jwt_required
+    def put(self):
+        pass
+
+    @jwt_required
+    def delete(self):
+        pass
 # 任务管理接口
 class TaskApi(Resource):
     def get(self):
