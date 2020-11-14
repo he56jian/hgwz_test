@@ -34,19 +34,25 @@ class User(db.Model):
 # 用户管理接口
 class UserApi(Resource):
     # 用户查询
+    @jwt_required
     def get(self):
         users = User.query.all()
-        return [{'id': u.id, 'username': u.username} for u in users]
+        return [{'id': u.id, 'username': u.username, 'password': u.password, 'email': u.email} for u in users]
 
     # 用户登录
     def post(self):
         # 通过客户端的json中拿到username/password
         username = request.json.get('username')
         password = request.json.get('password')
-        user = User.query.filter_by(username=username, password=password).first()
+        email = request.json.get('email')
+        user = User.query.filter_by(username=username, password=password).first() | \
+               User.query.filter_by(email=email, password=password).first()
         if user:
-            # 登录成功后返回用户一个token
-            access_token = create_access_token(identity=username)
+            if username:
+                # 登录成功后返回用户一个token
+                access_token = create_access_token(identity=username)
+            elif email:
+                access_token = create_access_token(identity=email)
             return {'msg': 'login success', 'token': access_token}
         else:
             return {
@@ -64,8 +70,31 @@ class UserApi(Resource):
         return {'msg': 'register success'}
 
     # 用户账号销毁
+    @jwt_required
     def delete(self):
-        pass
+        username = request.json.get('username')
+        password = request.json.get('password')
+        email = request.json.get('email')
+        user = User.query.filter_by(username=username, password=password).first() | \
+               User.query.filter_by(email=email, password=password).first()
+        db.session.delete(user)
+        db.session.commit()
+
+    # 用户密码修改
+    @jwt_required
+    def modify(self):
+        username = request.json.get('username')
+        password = request.json.get('password')
+        newpassword = request.json.get('newpassword')
+        email = request.json.get('email')
+
+        user = User.query.filter_by(username=username, password=password).first() | \
+               User.query.filter_by(email=email, password=password).first()
+        user.password = newpassword
+        db.session.commit()
+        return {
+            'msg': 'password modified successfully'
+        }
 
 
 # 用例管理接口
