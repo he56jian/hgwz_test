@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from flask_restful import Resource, Api
 from flask_sqlalchemy import SQLAlchemy
+from jenkinsapi.jenkins import Jenkins
 
 app = Flask(__name__)
 api = Api(app)  # 路由初始化(
@@ -174,18 +175,34 @@ class TaskApi(Resource):
     @jwt_required
     def post(self):
         """
-        发起的是/testcase, post ,表示新增
-        发起的是/testcase?id=1, post，表示修改
+        发起的是/testcase, post ,表示新增,并且开始执行任务
+        /task?id=1,结果回传
         :return:
         """
         # request.json获得的是客户端发过来的数据
-        task = Task()
-        if request.json.get('log'):
-            task.log = request.json.get('log')
-        if request.json.get('testcase_id'):
-            task.testcase_id = request.json.get('testcase_id')
-        db.session.add(task)
-        db.session.commit()
+        if request.args.get('id'):
+            # todo:完善测试
+            task = Task.query.filter_by(id=request.args.get('id')).first()
+            if request.json.get('log'):
+                task.log = request.json.get('log')
+                db.session.flush()
+                db.session.commit()
+
+        else:
+            task = Task()
+            if request.json.get('log'):
+                task.log = request.json.get('log')
+            if request.json.get('testcase_id'):
+                task.testcase_id = request.json.get('testcase_id')
+            db.session.add(task)
+            db.session.commit()
+
+            jenkins = Jenkins('http://localhost:8080', username='username', password='token')
+            jenkins['lagou3'].invoke(
+                securitytoken='自己创建的token',  # 在初始化的时候已经认证，就不需要添加
+                build_params={'testcase_id': task.testcase_id},
+                block=True
+            )
 
     @jwt_required
     def put(self):
