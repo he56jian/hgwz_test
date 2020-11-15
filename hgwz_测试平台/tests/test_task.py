@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 
 
-class Test_UserApi:
+class Test_TaskApi:
     url = "http://127.0.0.1:5000/task"
 
     def setup(self):

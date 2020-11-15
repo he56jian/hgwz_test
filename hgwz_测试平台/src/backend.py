@@ -27,18 +27,19 @@ class User(db.Model):
         return '<User %r>' % self.username
 
 
-# 任务表结构定义
+#
+# # 任务表结构定义
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     log = db.Column(db.String(1024), unique=False, nullable=False)
     # 数据库的一对多模型
-    # 关联,使用db.ForeignKey('testcase_id')，表示外键指向的是testcase_id(即testcase表的主键
-    testcase_id = db.Column(db.Integer, db.ForeignKey('test_case_id'), nullable=False)
-    # 反向引用，根据key时获取其内容,即使用test_case_id的时候的结果
-    testcase = db.relationship('TestCase', backref=db.backref('task', lazy=True))
+    # 关联,使用db.ForeignKey('testcase_id')，表示外键指向的是test_case的id(即test_case表的主键
+    testcase_id = db.Column(db.Integer, db.ForeignKey('test_case.id'), nullable=False)
+    # # 反向引用，根据key时获取其内容,即使用test_case_id的时候的结果,通过tasks可以引用Testcase
+    testcase = db.relationship('TestCase', backref=db.backref('tasks', lazy=True))
 
     def __repr__(self):
-        return '<TestCase %r' % self.name
+        return '<Task %r' % self.log
 
 
 # 参数用例表类
@@ -163,11 +164,12 @@ class TestCaseApi(Resource):
         pass
 
 
-# 任务管理接口
+#
+# # 任务管理接口
 class TaskApi(Resource):
     # @jwt_required
     def get(self):
-        return [{'id': task.id, 'log': task.log, 'testcase_id': task.testcase_id} for task in Task.query.all()]
+        return [{'id': tasks.id, 'log': tasks.log, 'testcase_id': tasks.testcase_id} for tasks in Task.query.all()]
 
     @jwt_required
     def post(self):
